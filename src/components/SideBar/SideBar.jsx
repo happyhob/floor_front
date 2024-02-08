@@ -16,6 +16,7 @@ import { IoRefresh } from "react-icons/io5";
 import CreateCode from "../../pages/QR";
 import { IoPersonSharp } from "react-icons/io5";
 
+
 function SideBar({setGltfBlobUrl, setJsonData, setBuildingId, setFloorNum}) {
     const {isLogin, logout, userInfo} = useContext(LoginContext);
     const navigate = useNavigate();
@@ -140,6 +141,17 @@ function SideBar({setGltfBlobUrl, setJsonData, setBuildingId, setFloorNum}) {
                 console.error('There was an error!', error);
             });
     };
+    
+    const buildingdelete =(buildingid) =>{
+        console.log("건물 삭제 요청", buildingid)
+        const response = auth.delBuild(buildingid.buildingId);
+        console.log(response.status);
+        if(response.status==200)
+        {
+            Swal.alert("삭제 성공", "건물 번호:"+buildingid.buildingId, "success");  // alert를 띄움;
+        }
+
+    }
 
 
     /**
@@ -220,7 +232,7 @@ function SideBar({setGltfBlobUrl, setJsonData, setBuildingId, setFloorNum}) {
 
                                     <Offcanvas.Body style={{backgroundColor : '#fdf6de'}}>
                                         <Nav className="flex-grow-1 pe-3">
-                                            <Button onClick={handleClick}>
+                                            <Button style={{backgroundColor : '#7a573e', color : 'white', width: '100%'}} onClick={handleClick}>
                                                 파일 추가하기
                                             </Button>
                                             <NavDropdown
@@ -249,7 +261,7 @@ function SideBar({setGltfBlobUrl, setJsonData, setBuildingId, setFloorNum}) {
                                         <Nav className="flex-grow-1 pe-3">
                                             <div>
                                                 <UploadModal isOpen={modalIsOpen} closeModal={closeModal}/>
-                                                <Button style={{backgroundColor : '#7a573e', color : 'white'}} onClick={openModal}>
+                                                <Button style={{backgroundColor : '#7a573e', color : 'white', width: '100%'}} onClick={openModal}>
                                                     파일 추가하기
                                                 </Button>
                                             </div>
@@ -266,6 +278,7 @@ function SideBar({setGltfBlobUrl, setJsonData, setBuildingId, setFloorNum}) {
                                                 >
                                                     <NavDropdown.Item className='dropDownButtonStyle'>
                                                         <button className="itemBtnStyle" onClick={()=> fetchBuilding(building.buildingId)}>건물 도면</button>
+                                                        <button className="itemBtnStyle" onClick={()=> buildingdelete(building)}>건물 삭제</button>
                                                         <CreateCode  buildingId={building.buildingId} setOffcanvas={setOffcanvas}/>
                                                     </NavDropdown.Item>
 
@@ -275,6 +288,7 @@ function SideBar({setGltfBlobUrl, setJsonData, setBuildingId, setFloorNum}) {
                                                             key={index}
                                                             onClick={() => {
                                                                 fetchModel(building.buildingId, floor);
+                                                                // 여기에 들어가야 함
                                                             }}
                                                         >
                                                             <NavDropdown.Item className='dropDownButtonStyle'>

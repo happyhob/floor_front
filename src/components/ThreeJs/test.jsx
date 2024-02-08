@@ -12,31 +12,22 @@ import * as Swal from "../../apis/alert";
 import Draggable from 'react-draggable';
 
 // 3D 모델을 렌더링하는 Model 컴포넌트
-const Model = ({ url,onObjectClick, setnewgltf, setText, setModifiedObjects }) => {
+const Model = ({ url,onObjectClick, setnewgltf, setModifiedObjects }) => {
     const [gltf, setGltf] = useState(null);
     const meshRef = useRef();
     const { camera } = useThree();
-    const [renderCount, setRenderCount] = useState(0);
-    const objects = [];
+
 
     //랜더링 될 때 가져온 glb 파일을 로드한다
     useEffect(() => {
         // GLTF 모델을 로드하고 meshRef에 저장합니다.
         const loader = new GLTFLoader();
         loader.load(url, (gltf) => {
-            setRenderCount(0);
             setGltf(gltf.scene);
             setnewgltf(gltf.scene)
 
-            camera.position.z = 20;
-            camera.position.y = 10;
-            camera.position.x = 0;
-
-
         });
     }, [url]);
-
-
 
     // 모델의 클릭 이벤트 핸들링 및 선택된 오브젝트 상태 업데이트
     useEffect(() => {
@@ -51,7 +42,7 @@ const Model = ({ url,onObjectClick, setnewgltf, setText, setModifiedObjects }) =
             );
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(meshRef.current.children, true);
-            
+
             if (intersects.length > 0) {
                 onObjectClick(intersects[0].object);
                 setModifiedObjects((prevObjects) => ({
@@ -59,31 +50,13 @@ const Model = ({ url,onObjectClick, setnewgltf, setText, setModifiedObjects }) =
                     [intersects[0].object.uuid]: intersects[0].object
                 }));
             }
-            
         };
-        
+
         const primitive = meshRef.current;
         primitive.addEventListener('click', handleClick);
-        
-        setRenderCount(prevCount => prevCount + 1);
-
-
-        if(renderCount<=1){
-            handleClick({ clientX: window.innerWidth / 2 -1, clientY: window.innerHeight / 2 -1});
-            gltf.traverse((child) => {
-                if (child instanceof THREE.Mesh && child.name.includes('polygon3')) {
-                    objects.push(child)
-                    handleClick({ clientX: child.position.x, clientY: child.position.y });
-                }
-            });
-
-        }
-            
-
 
         return () => {
             primitive.removeEventListener('click', handleClick);
-            
         };
     }, [onObjectClick, setModifiedObjects, camera, meshRef]);
 
@@ -129,11 +102,6 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel
             populateFormFields();
         }
     }, [selectedObject, jsonData]);
-
-    // useEffect(()=>{
-        
-    // },[objectDetails])
-    
 
     // 입력 필드 변경 이벤트 핸들러
     const handleInfoInputChange = (e, index, type) => {
@@ -190,26 +158,26 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel
             defaultPosition={{ x: 70, y: 20 }} // Set the default position
             bounds="parent" // Restrict dragging to the parent element
         >
-            <div className="input" style={{
+            <div className="input_con" style={{
                 position: 'absolute',
                 top: '20%',
                 left: '70%',
-                background: "rgba(106,36,3,0.89)",
+                background: "#4ce7ae",
                 padding: '20px',
                 zIndex: 100
             }}>
                 {/* 선택된 오브젝트의 이름을 보여주는 레이블과 방 이름 입력 필드 */}
                 <div>
+                    <label style={{display: 'flex', justifyContent: 'center'}}>{objectDetails.roomName}</label>
                     <input
-                        className="text_room"
+                        className="roomName"
                         type="text"
                         value={objectDetails.roomName}
                         onChange={handleRoomNameChange}
                     />
                 </div>
                 <br/>
-
-                <div>
+                <div style={{marginLeft: '10px'}}>
                     {/* 오브젝트의 정보를 입력받는 동적 필드들 */}
                     {objectDetails.info && objectDetails.info.map((item, index) => (
                         <div key={index}>
@@ -227,27 +195,26 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel
                                 value={item.value}
                                 onChange={(e) => handleInfoInputChange(e, index, 'value')}
                             />
-                            <button className='btn btn-primary1 btn_remove' onClick={() => handleRemoveField(index)}>
+                            <button className='btn btn-primary btn_remove'
+                                    onClick={() => handleRemoveField(index)} >
                                 <FontAwesomeIcon icon={faTimes}/>
                             </button>
                         </div>
                     ))}
                     {/* 메타데이터 필드 추가 버튼 */}
-                    <button className='btn button-plus' onClick={addMetadataField}>
+                    <button className='btn btn-primary btn_plus' onClick={addMetadataField}>
                         항목 추가
                     </button>
                 </div>
-
                 <br/>
-
                 <div>
                     {/* 저장 및 취소 버튼 */}
                     <div className="button-container">
-                        <button className="btn btn-primary btn-layer-3_1" onClick={onSubmit} style={{marginRight: '10px',background: '#af8b74'}}>
+                        <button className="btn btn-primary btn-layer-1_1" onClick={onSubmit} style={{marginRight: '10px'}}>
                             저장
                             <FontAwesomeIcon icon={faCheck}/>
                         </button>
-                        <button className="btn btn-primary btn-layer-3_1" onClick={onCancel} style={{background: '#af8b74'}}>
+                        <button className="btn btn-primary btn-layer-3_1" onClick={onCancel}>
                             취소
                             <FontAwesomeIcon icon={faTimes}/>
                         </button>
@@ -276,14 +243,6 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
         setData(jsonData);
     }, [jsonData]);
 
-
-
-
-    // useEffect(()=>{
-    //     //handleSubmitDetails();
-    // },[modifiedObjects])
-
-
     // 오브젝트 클릭 핸들러
     const handleObjectClick = (object) => {
         setSelectedObject(object);
@@ -311,8 +270,6 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
         const str2 = str.split('_');
         console.log('Selected Object UUID:', str2);
     };
-
-
 
     //오브젝트 정보와 라벨 정보를 넘겨서 띄워준다
     const setText = (objectss) => {
@@ -345,8 +302,6 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
                         }
                     };
                 });
-                
-                
             }
         );
     };
@@ -394,12 +349,7 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
         }
         // TODO 이거 무한루프 해결해야됨!!!!
       setText(objects)
-
-    },[selectedObject])
-    
-
-    
-
+    },[labels])
 
     // 세부 정보 저장 핸들러
     const handleSubmitDetails = async () => {
@@ -431,65 +381,39 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
                 return updatedData;
             });
 
+
+
             // JSON 데이터를 바이트 배열로 변환
-            //const jsonDataBytes = new TextEncoder().encode(JSON.stringify(jsonData));
+            const jsonDataBytes = new TextEncoder().encode(JSON.stringify(jsonData));
 
             console.log('Data before sending:', jsonData);
+
+            // Send the updated jsonData to the server as a byte array
+            try {
+                const response = await axios.put(
+                    `/file/${buildingId}/${floorNum}`,
+                    jsonDataBytes,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json; charset=UTF-8',
+                        },
+                    }
+                )
+            .then(response => {
+                    if (response.status === 200) { // 서버에서 success 키를 반환하는지 확인해주세요
+                        Swal.alert("수정 성공.", "3D 와 세부정보를 확인해주세요", "success");  // alert를 띄움;
+                    } else {
+                        Swal.alert("수정 실패", "다시 시도 해주세요.", "warning");  // alert를 띄움
+                    }
+
+                });
+            } catch (error) {
+                console.error('Error updating floor:', error);
+            }
+
             setShowDetailsForm(false);
-
-            // //Send the updated jsonData to the server as a byte array
-            // try {
-            //     const response = await axios.put(
-            //         `/file/${buildingId}/${floorNum}`,
-            //         data,
-            //         {
-            //             headers: {
-            //                 'Content-Type': 'application/json; charset=UTF-8',
-            //             },
-            //         }
-            //     )
-            // .then(response => {
-            //         if (response.status === 200) { // 서버에서 success 키를 반환하는지 확인해주세요
-            //             Swal.alert("수정 성공.", "3D 와 세부정보를 확인해주세요", "success");  // alert를 띄움;
-            //         } else {
-            //             Swal.alert("수정 실패", "다시 시도 해주세요.", "warning");  // alert를 띄움
-            //         }
-
-            //     });
-            // } catch (error) {
-            //     console.error('Error updating floor:', error);
-            // }
-
         }
     };
-
-    const fatchData=async()=>{
-        try {
-            const response = await axios.put(
-                `/file/${buildingId}/${floorNum}`,
-                data,
-                {
-                    headers: {
-                        'Content-Type': 'application/json; charset=UTF-8',
-                    },
-                }
-            )
-        .then(response => {
-                if (response.status === 200) { // 서버에서 success 키를 반환하는지 확인해주세요
-                    Swal.alert("수정 성공.", "3D 와 세부정보를 확인해주세요", "success");  // alert를 띄움;
-                } else {
-                    Swal.alert("수정 실패", "다시 시도 해주세요.", "warning");  // alert를 띄움
-                }
-
-            });
-        } catch (error) {
-            console.error('Error updating floor:', error);
-        }
-    }
-    
-    useEffect(()=>{
-        fatchData();
-    },[modifiedObjects])
 
     // 세부 정보 취소 핸들러
     const handleCancelDetails = () => {
@@ -535,6 +459,7 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
                               anchorX="center"
                               anchorY="middle"
                               rotation={label.rotation}
+                              //한글 폰트 추가
                               font={'https://fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Bold.woff'}
                         >
                             {label.text}
@@ -553,6 +478,8 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
                     selectedObject={selectedObject}
                 />
             )}
+            {/* JSON 다운로드 버튼 */}
+            <button onClick={handleDownloadJson}>Download JSON</button>
         </div>
     );
 };

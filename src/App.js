@@ -31,7 +31,11 @@ const App = () => {
           <MobileView/>
         </div>
       </BrowserRouter>
-  );
+  );  
 };
+const NotFound = () => {
+  return <h1>404 - Not Found</h1>;
+};
+
 
 export default App;

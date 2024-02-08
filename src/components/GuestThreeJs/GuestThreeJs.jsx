@@ -6,13 +6,103 @@ import { OrbitControls, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import "../ThreeJs/ThreeJs.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import Draggable from 'react-draggable';
+import axios from "axios";
+import { MdOutlineKeyboardBackspace } from "react-icons/md";
+import * as Swal from "../../apis/alert";
 
-// 3D 모델을 렌더링하는 Model 컴포넌트
-const Model = ({ url,onObjectClick, setnewgltf, setText, setModifiedObjects }) => {
+// 도면 3D 모델을 렌더링하는 Model 컴포넌트
+const Model = ({ url,onObjectClick, setnewgltf, setModifiedObjects, findObj }) => {
     const [gltf, setGltf] = useState(null);
     const meshRef = useRef();
     const { camera } = useThree();
+    const [renderCount, setRenderCount] = useState(0);
+    const objects = [];
+
+
+    //랜더링 될 때 가져온 glb 파일을 로드한다
+    useEffect(() => {
+        // GLTF 모델을 로드하고 meshRef에 저장합니다.
+        const loader = new GLTFLoader();
+        loader.load(url, (gltf) => {
+            setRenderCount(0);
+            setGltf(gltf.scene);
+            setnewgltf(gltf.scene)
+
+
+            camera.position.z = 10;
+            camera.position.y = 10;
+            camera.position.x = 10;
+
+        });
+    }, [url]);
+
+    // 모델의 클릭 이벤트 핸들링 및 선택된 오브젝트 상태 업데이트
+    useEffect(() => {
+        if (!meshRef.current) {
+            return;
+        }
+        const handleClick = (event) => {
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2(
+                (event.clientX / window.innerWidth) * 2 - 1,
+                -(event.clientY / window.innerHeight) * 2 + 1
+            );
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(meshRef.current.children, true);
+
+            if (intersects.length > 0) {
+                onObjectClick(intersects[0].object);
+                setModifiedObjects((prevObjects) => ({
+                    ...prevObjects,
+                    [intersects[0].object.uuid]: intersects[0].object
+                }));
+            }
+        };
+
+        const primitive = meshRef.current;
+        primitive.addEventListener('click', handleClick);
+
+        setRenderCount(prevCount => prevCount + 1);
+
+
+        if(renderCount<=1){
+            handleClick({ clientX: window.innerWidth / 2 -1, clientY: window.innerHeight / 2 -1});
+            gltf.traverse((child) => {
+                if (child instanceof THREE.Mesh && child.name.includes('polygon3')) {
+                    objects.push(child)
+                    handleClick({ clientX: child.position.x, clientY: child.position.y });
+                }
+            });
+
+        }
+
+        return () => {
+            primitive.removeEventListener('click', handleClick);
+        };
+    }, [onObjectClick, setModifiedObjects, camera, meshRef]);
+
+    // 렌더링
+    return gltf ? (
+        <group
+            ref={meshRef}
+            onClick={(event) => {
+                event.stopPropagation();
+                onObjectClick(event.object);
+            }}
+        >
+            <primitive object={gltf} scale={0.01}/>
+        </group>
+    ) : null;
+};
+
+// 건물 3D 모델을 렌더링하는 Model 컴포넌트
+const Model2 = ({ url,onObjectClick, setnewgltf, setModifiedObjects }) => {
+    const [gltf, setGltf] = useState(null);
+    const meshRef = useRef();
+    const { camera } = useThree();
+
 
 
     //랜더링 될 때 가져온 glb 파일을 로드한다
@@ -22,6 +112,11 @@ const Model = ({ url,onObjectClick, setnewgltf, setText, setModifiedObjects }) =
         loader.load(url, (gltf) => {
             setGltf(gltf.scene);
             setnewgltf(gltf.scene)
+
+
+            camera.position.z = 20;
+            camera.position.y = 10;
+            camera.position.x = 0;
 
         });
     }, [url]);
@@ -72,7 +167,7 @@ const Model = ({ url,onObjectClick, setnewgltf, setText, setModifiedObjects }) =
 };
 
 // 오브젝트의 세부 정보를 수정하는 Form 컴포넌트
-const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel, jsonData, selectedObject }) => {
+const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onCancel, jsonData, selectedObject }) => {
     // 선택된 오브젝트 정보로 폼 필드 초기화
     const populateFormFields = () => {
         if (!selectedObject || !jsonData) {
@@ -120,15 +215,6 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel
     };
 
     // 메타데이터 필드 추가
-    const addMetadataField = () => {
-        setObjectDetails((prevDetails) => ({
-            ...prevDetails,
-            info: [
-                ...prevDetails.info,
-                { key: "" , value: "" }
-            ]
-        }));
-    };
 
     // 방 이름 변경 이벤트 핸들러
     const handleRoomNameChange = (e) => {
@@ -140,23 +226,29 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel
 
     // 렌더링
     return (
-        <div className="input_con" style={{
+        <Draggable
+            defaultPosition={{ x: 70, y: 20 }} // Set the default position
+            bounds="parent" // Restrict dragging to the parent element
+        >
+        <div className="input1" style={{
             position: 'absolute',
             top: '20%',
             left: '70%',
-            background: "#4ce7ae",
+            background: "rgba(106,36,3,0.89)",
             padding: '20px',
-            zIndex: 100
+            zIndex: 100,
+            color : 'white'
         }}>
             {/* 선택된 오브젝트의 이름을 보여주는 레이블과 방 이름 입력 필드 */}
             <div>
-                <label style={{display: 'flex', justifyContent: 'center'}}>{objectDetails.name}</label>
+                <label style={{display: 'flex', justifyContent: 'center'}}>{objectDetails.roomName}</label>
                 <input
-                    className="roomName"
-                    type="text"
-                    value={objectDetails.roomName}
-                    onChange={handleRoomNameChange}
-                />
+                        className="text_room1"
+                        type="text"
+                        value={objectDetails.roomName}
+                        onChange={handleRoomNameChange}
+                        disabled
+                    />
             </div>
             <br/>
             <div style={{marginLeft: '10px'}}>
@@ -169,6 +261,7 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel
                             placeholder="항목"
                             value={item.key}
                             onChange={(e) => handleInfoInputChange(e, index, 'key')}
+                            disabled
                         />
                         <input
                             className="text_value"
@@ -176,37 +269,28 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel
                             placeholder="값"
                             value={item.value}
                             onChange={(e) => handleInfoInputChange(e, index, 'value')}
+                            disabled
                         />
-                        <button className='btn btn-primary btn_remove'>
-                            <FontAwesomeIcon icon={faTimes}/>
-                        </button>
                     </div>
                 ))}
-                {/* 메타데이터 필드 추가 버튼 */}
-                <button className='btn btn-primary btn_plus' onClick={addMetadataField}>
-                    항목 추가
-                </button>
             </div>
             <br/>
             <div>
                 {/* 저장 및 취소 버튼 */}
                 <div className="button-container">
-                    <button className="btn btn-primary btn-layer-1_1" onClick={onSubmit} style={{marginRight: '10px'}}>
-                        저장
-                        <FontAwesomeIcon icon={faCheck}/>
-                    </button>
-                    <button className="btn btn-primary btn-layer-3_1" onClick={onCancel}>
-                        취소
+                    <button className="btn btn-check1" onClick={onCancel}>
+                        닫기
                         <FontAwesomeIcon icon={faTimes}/>
                     </button>
                 </div>
             </div>
         </div>
+        </Draggable>
     );
 };
 
 // ThreeJs 컴포넌트
-const GuestThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
+const GuestThreeJs = ({ buildingId, gltfBlobUrl: initialGltfBlobUrl, jsonData: initialJsonData }) => {
     const [labels, setLabels] = useState({});
     //이걸로 건물 정보 입력 모달 상태 관리(true 열림, false 닫힘)
     const [showDetailsForm, setShowDetailsForm] = useState(false);
@@ -217,11 +301,54 @@ const GuestThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
     const [modifiedObjects, setModifiedObjects] = useState({});
     const [gltf, setGltf] = useState(null);
     const [data, setData] = useState({});
+    const [gltfBlobUrl, setGltfBlobUrl] = useState();
+    const [gltfBlobUrl2, setGltfBlobUrl2] = useState(initialGltfBlobUrl);
+    const [jsonData, setJsonData] = useState(initialJsonData);
 
     // 초기에 JSON 데이터 설정
     useEffect(() => {
-        setData(jsonData);
-    }, [jsonData]);
+        setGltfBlobUrl2(initialGltfBlobUrl);
+    }, [initialGltfBlobUrl]);
+
+    // 초기에 JSON 데이터 설정
+    useEffect(() => {
+        setData(initialJsonData);
+    }, [initialJsonData]);
+
+
+    const floormodel=(num)=>{
+        const url = `/guest/${buildingId}/${num}`;
+        axios.get(url) // Blob 형태로 받아옵니다.
+            // { responseType: 'blob' }
+            .then(response => {
+                const floorFileData = response.data.floorFileData;
+                const metaData = response.data.metaData;
+
+                const decodedString = atob(metaData);
+                const utf8Decoder = new TextDecoder('utf-8');
+                const jsonString = utf8Decoder.decode(new Uint8Array(decodedString.split('').map(char => char.charCodeAt(0))));
+                const newJsonData = JSON.parse(jsonString);
+                setJsonData(newJsonData);
+
+                console.log('jsonData:', jsonData); // 여기에 jsonData를 콘솔에 출력합니다.
+
+                // floorFileData를 base64 디코딩하여 Blob 생성
+                const byteCharacters = atob(floorFileData);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+
+                const blobUrl = URL.createObjectURL(blob); // Blob URL을 생성합니다.
+                setGltfBlobUrl2(null);
+                setGltfBlobUrl(blobUrl); // Blob URL을 상태로 저장합니다.
+            })
+            .catch(error => {
+                console.error('There was an error!', error);
+            });
+    }
 
     // 오브젝트 클릭 핸들러
     const handleObjectClick = (object) => {
@@ -234,8 +361,29 @@ const GuestThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
             name: objectLabels?.text || object.name || '',
         });
 
-        console.log('Selected Object UUID:', object.name);
-    };
+        // Check if object.name exists in jsonData before accessing it
+        if (jsonData && jsonData[object.name]) {
+            const clickedObjectData = jsonData[object.name];
+
+            if (clickedObjectData) {
+                setObjectDetails((prevDetails) => ({
+                    ...prevDetails,
+                    roomName: clickedObjectData.roomName || '',
+                    info: Object.entries(clickedObjectData.info || {}).map(([key, value]) => ({ key, value }))
+                }));
+            }
+        }
+
+        // str2가 숫자인 경우에 추가적인 작업 실행
+        const str = object.name;
+        const str2 = str.split('_');
+
+        
+
+        if (!isNaN(parseInt(str2[0]))) {
+            floormodel(str2[0]);
+        }
+    }
 
     //오브젝트 정보와 라벨 정보를 넘겨서 띄워준다
     const setText = (objectss) => {
@@ -300,6 +448,13 @@ const GuestThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
     const setnewgltf = (newgltf) => {
         setLabels({});
         setGltf(newgltf);
+        // gltf.traverse((child) => {
+        //     if (child instanceof THREE.Mesh && child.name.includes('polygon')) {
+        //         // 새로운 재질을 생성하고 적용합니다.
+        //         const newMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // 빨간색으로 변경하려면 0xff0000을 원하는 색상으로 변경하세요.
+        //         child.material = newMaterial;
+        //     }
+        // });
         console.log(jsonData);
     };
 
@@ -310,11 +465,16 @@ const GuestThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
             gltf.traverse((child) => {
                 if (child instanceof THREE.Mesh && child.name.includes('polygon')) {
                     objects.push(child)
+                    if(child.name == findObj)
+                    {
+                        const newMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // 빨간색으로 변경하려면 0xff0000을 원하는 색상으로 변경하세요.
+                        child.material = newMaterial;
+                    }
                 }
             });
         }
         setText(objects)
-    },[labels])
+    },[selectedObject])
 
     // 세부 정보 저장 핸들러
     const handleSubmitDetails = () => {
@@ -350,41 +510,98 @@ const GuestThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
         }
     };
 
-    // 세부 정보 취소 핸들러
+    // 입력 필드 변경 이벤트 핸들러
     const handleCancelDetails = () => {
         setShowDetailsForm(false);
     };
 
-    // JSON 다운로드 핸들러
-    const handleDownloadJson = () => {
-        console.log('data:', jsonData)
-        // 데이터 객체를 JSON 문자열로 변환
-        const jsonDataString = JSON.stringify(jsonData, null, 2);
+    const [searchtest  ,setSearchtest]= useState('');
+    const [findObj, setFindObj] = useState();
 
-        // JSON 문자열로 Blob 생성
-        const blob = new Blob([jsonDataString], { type: 'application/json' });
+    const handleChange = (event) => {
+        setSearchtest(event.target.value);
+      };
 
-        // 다운로드 링크 생성하고 클릭 이벤트 트리거
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'scene_data.json';
-        a.click();
+    // 방 검색 핸들러
+    const searchRoom=()=>{
+        // e.preventDefault();
+        // const searchRoom = e.target.search.value;
+        console.log(searchtest)
+        const url = `/guest/${buildingId}/search?roomName=${searchtest}`
+        axios.get(url,{ responseType: 'json' })
+        .then(response =>{
+            console.log(response.status);
+            const floorNum = response.data.floor;
+            const objName = response.data.objectName;
+            setFindObj(objName);
+            console.log(floorNum, objName);
+
+            if(response.status==200)
+            {
+                floormodel(floorNum);
+            }
+            
+        })
+        .catch(error => {
+             Swal.alert("검색 결과가 없습니다.", "다시 검색 해주세요.", "warning");  // alert를 띄움
+
+        });
+    }
+
+    const fetchBuilding = (buildingId) => {
+        const url = `/guest/${buildingId}`;
+        axios.get(url, { responseType: 'blob' })
+            .then(response => {
+                const blob = response.data;
+                const blobUrl = URL.createObjectURL(blob);
+                setGltfBlobUrl(null);
+                setGltfBlobUrl2(blobUrl);
+            })
+            .catch(error => {
+                console.error('There was an error!', error);
+            });
+    };
+    const findCencel=()=>{
+        setFindObj(null);
+        fetchBuilding(buildingId);
+    }
+
+    const handleGoBack = () => {
+        fetchBuilding(buildingId);
     };
 
     // 렌더링
     return (
         <div style={{marginLeft: "20px"}}>
+            <button className='btn_back' onClick={handleGoBack}><MdOutlineKeyboardBackspace style={{fontSize : '25px', marginRight : '3px'}} />돌아가기</button>
+            <div className='find' style={{position: 'fixed', right: '1%' ,top: '1%'}}>
+                <input
+                    className='input_search'
+                    type="text"
+                    value={searchtest}
+                    onChange={handleChange}
+                    required
+                ></input>
+                <button className="btn btn-primary btn_search" onClick={searchRoom} >검색</button>
+                <button className="btn btn-primary btn_search_cancel" onClick={findCencel} >취소</button>
+            </div>
+
             <div>
                 {/* 3D 캔버스 */}
                 <Canvas
-                    style={{height: "1000px", width: "100%"}}
+                    style={{height: "1000px", width: "100%", marginTop: "100px"}}
                 >
                     <OrbitControls/>
                     <ambientLight intensity={1.0}/>
                     <pointLight position={[10, 10, 10]} intensity={1000}/>
-                    {/* 모델 렌더링 */}
+                    {/* 도면 모델 렌더링 */}
                     {gltfBlobUrl && <Model url={gltfBlobUrl} onObjectClick={handleObjectClick}
-                                           setModifiedObjects={setModifiedObjects} setnewgltf={setnewgltf} setText={setText}/>}
+                                           setModifiedObjects={setModifiedObjects} setnewgltf={setnewgltf}
+                                           setText={setText} findObj={findObj} />}
+                    {/* 건물 모델 렌더링 */}
+                    {gltfBlobUrl2 && <Model2 url={gltfBlobUrl2} onObjectClick={handleObjectClick}
+                                           setModifiedObjects={setModifiedObjects} setnewgltf={setnewgltf}
+                                           setText={setText}/>}
                     {/* 라벨 렌더링 */}
                     {Object.entries(labels).map(([uuid, label]) => (
                         <Text key={uuid}
@@ -394,6 +611,8 @@ const GuestThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
                               anchorX="center"
                               anchorY="middle"
                               rotation={label.rotation}
+                            //한글 폰트 추가
+                              font={'https://fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Bold.woff'}
                         >
                             {label.text}
                         </Text>
