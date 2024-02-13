@@ -180,6 +180,7 @@ const UploadModal = ({ isOpen, closeModal }) => {
                 <div className="file_upload" style={fileUploadContainerStyle}>
                     {files.map((file, index) => (
                         <div key={index}>
+                        <span style={{textAlign:'left'}} >{index + 1}층 </span>
                         <input type="file" accept="image/*" onChange={(event) => handleFileChange(event, index)}
                                style={{marginBottom: '10px'}}/>
                         <button onClick={addFileInput} className='btn btn-add' style={{border : '2px solid #522b07'}}><FiFilePlus/></button>

@@ -227,65 +227,60 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onCancel, jsonData
     // 렌더링
     return (
         <Draggable
+            handle=".modal-header"
             defaultPosition={{ x: 70, y: 20 }} // Set the default position
             bounds="parent" // Restrict dragging to the parent element
         >
-        <div className="input1" style={{
-            position: 'absolute',
-            top: '20%',
-            left: '70%',
-            background: "rgba(106,36,3,0.89)",
-            padding: '20px',
-            zIndex: 100,
-            color : 'white'
-        }}>
-            {/* 선택된 오브젝트의 이름을 보여주는 레이블과 방 이름 입력 필드 */}
-            <div>
-                <label style={{display: 'flex', justifyContent: 'center'}}>{objectDetails.roomName}</label>
-                <input
-                        className="text_room1"
-                        type="text"
-                        value={objectDetails.roomName}
-                        onChange={handleRoomNameChange}
-                        disabled
-                    />
-            </div>
-            <br/>
-            <div style={{marginLeft: '10px'}}>
-                {/* 오브젝트의 정보를 입력받는 동적 필드들 */}
-                {objectDetails.info && objectDetails.info.map((item, index) => (
-                    <div key={index}>
-                        <input
-                            className="text_key"
-                            type="text"
-                            placeholder="항목"
-                            value={item.key}
-                            onChange={(e) => handleInfoInputChange(e, index, 'key')}
-                            disabled
-                        />
-                        <input
-                            className="text_value"
-                            type="text"
-                            placeholder="값"
-                            value={item.value}
-                            onChange={(e) => handleInfoInputChange(e, index, 'value')}
-                            disabled
-                        />
+            <div className="input1" style={{
+                position: 'absolute',
+                top: '20%',
+                left: '70%',
+                background: "rgba(106,36,3,0.89)",
+                padding: '20px',
+                zIndex: 100
+            }}>
+                {/* 선택된 오브젝트의 이름을 보여주는 레이블과 방 이름 입력 필드 */}
+                <div className="modal-header">
+                    <label>{objectDetails.roomName}</label>
+                </div>
+                <br/>
+                <div style={{marginLeft: '10px'}}>
+                    {/* 오브젝트의 정보를 입력받는 동적 필드들 */}
+                    {objectDetails.info && objectDetails.info.map((item, index) => (
+                        <div key={index}>
+                            <input
+                                className="text_key"
+                                type="text"
+                                placeholder="비어있음"
+                                value={item.key}
+                                onChange={(e) => handleInfoInputChange(e, index, 'key')}
+                                disabled
+                            />
+                            <input
+                                className="text_value"
+                                type="text"
+                                placeholder="비어있음"
+                                value={item.value}
+                                onChange={(e) => handleInfoInputChange(e, index, 'value')}
+                                disabled
+                            />
+                        </div>
+                    ))}
+                </div>
+                <br/>
+                <div>
+                    {/* 저장 및 취소 버튼 */}
+                    <div>
+                        <button className="btn btn-primary btn-layer-3_1" onClick={onCancel} style={{background: '#af8b74'}}>
+                            닫기
+                            <FontAwesomeIcon icon={faTimes}/>
+                        </button>
                     </div>
-                ))}
-            </div>
-            <br/>
-            <div>
-                {/* 저장 및 취소 버튼 */}
-                <div className="button-container">
-                    <button className="btn btn-check1" onClick={onCancel}>
-                        닫기
-                        <FontAwesomeIcon icon={faTimes}/>
-                    </button>
                 </div>
             </div>
-        </div>
         </Draggable>
+
+
     );
 };
 
@@ -378,7 +373,7 @@ const GuestThreeJs = ({ buildingId, gltfBlobUrl: initialGltfBlobUrl, jsonData: i
         const str = object.name;
         const str2 = str.split('_');
 
-        
+
 
         if (!isNaN(parseInt(str2[0]))) {
             floormodel(str2[0]);
@@ -540,7 +535,7 @@ const GuestThreeJs = ({ buildingId, gltfBlobUrl: initialGltfBlobUrl, jsonData: i
             {
                 floormodel(floorNum);
             }
-            
+
         })
         .catch(error => {
              Swal.alert("검색 결과가 없습니다.", "다시 검색 해주세요.", "warning");  // alert를 띄움
@@ -570,9 +565,18 @@ const GuestThreeJs = ({ buildingId, gltfBlobUrl: initialGltfBlobUrl, jsonData: i
         fetchBuilding(buildingId);
     };
 
+    const mobileStyle = {
+        width: '100%',
+        height: 'auto',
+        '@media (max-width: 600px)': {
+            width: '100%',
+            height: 'auto',
+        },
+    }
+
     // 렌더링
     return (
-        <div style={{marginLeft: "20px"}}>
+        <div style={mobileStyle}>
             <button className='btn_back' onClick={handleGoBack}><MdOutlineKeyboardBackspace style={{fontSize : '25px', marginRight : '3px'}} />돌아가기</button>
             <div className='find' style={{position: 'fixed', right: '1%' ,top: '1%'}}>
                 <input

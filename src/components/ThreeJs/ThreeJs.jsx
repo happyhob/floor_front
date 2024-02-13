@@ -78,12 +78,8 @@ const Model = ({ url,onObjectClick, setnewgltf, setText, setModifiedObjects }) =
             });
 
         }
-            
-
-
         return () => {
-            primitive.removeEventListener('click', handleClick);
-            
+            primitive.removeEventListener('click', handleClick);   
         };
     }, [onObjectClick, setModifiedObjects, camera, meshRef]);
 
@@ -187,10 +183,11 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel
     // 렌더링
     return (
         <Draggable
+            handle=".modal-header"
             defaultPosition={{ x: 70, y: 20 }} // Set the default position
             bounds="parent" // Restrict dragging to the parent element
         >
-            <div className="input" style={{
+            <div className="input1" style={{
                 position: 'absolute',
                 top: '20%',
                 left: '70%',
@@ -199,56 +196,39 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel
                 zIndex: 100
             }}>
                 {/* 선택된 오브젝트의 이름을 보여주는 레이블과 방 이름 입력 필드 */}
-                <div>
-                    <input
-                        className="text_room"
-                        type="text"
-                        value={objectDetails.roomName}
-                        onChange={handleRoomNameChange}
-                    />
+                <div className="modal-header">
+                    <label>{objectDetails.roomName}</label>
                 </div>
                 <br/>
-
-                <div>
+                <div style={{marginLeft: '10px'}}>
                     {/* 오브젝트의 정보를 입력받는 동적 필드들 */}
                     {objectDetails.info && objectDetails.info.map((item, index) => (
                         <div key={index}>
                             <input
                                 className="text_key"
                                 type="text"
-                                placeholder="항목"
+                                placeholder="비어있음"
                                 value={item.key}
                                 onChange={(e) => handleInfoInputChange(e, index, 'key')}
+                                disabled
                             />
                             <input
                                 className="text_value"
                                 type="text"
-                                placeholder="값"
+                                placeholder="비어있음"
                                 value={item.value}
                                 onChange={(e) => handleInfoInputChange(e, index, 'value')}
+                                disabled
                             />
-                            <button className='btn btn-primary1 btn_remove' onClick={() => handleRemoveField(index)}>
-                                <FontAwesomeIcon icon={faTimes}/>
-                            </button>
                         </div>
                     ))}
-                    {/* 메타데이터 필드 추가 버튼 */}
-                    <button className='btn button-plus' onClick={addMetadataField}>
-                        항목 추가
-                    </button>
                 </div>
-
                 <br/>
-
                 <div>
                     {/* 저장 및 취소 버튼 */}
-                    <div className="button-container">
-                        <button className="btn btn-primary btn-layer-3_1" onClick={onSubmit} style={{marginRight: '10px',background: '#af8b74'}}>
-                            저장
-                            <FontAwesomeIcon icon={faCheck}/>
-                        </button>
+                    <div>
                         <button className="btn btn-primary btn-layer-3_1" onClick={onCancel} style={{background: '#af8b74'}}>
-                            취소
+                            닫기
                             <FontAwesomeIcon icon={faTimes}/>
                         </button>
                     </div>
@@ -277,18 +257,11 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
     }, [jsonData]);
 
 
-
-
-    // useEffect(()=>{
-    //     //handleSubmitDetails();
-    // },[modifiedObjects])
-
-
     // 오브젝트 클릭 핸들러
     const handleObjectClick = (object) => {
         setSelectedObject(object);
-        setShowDetailsForm(true);
 
+        setShowDetailsForm(true);
         const objectLabels = labels[object.name];
 
         setObjectDetails({
@@ -392,7 +365,6 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
                 }
             });
         }
-        // TODO 이거 무한루프 해결해야됨!!!!
       setText(objects)
 
     },[selectedObject])
@@ -426,6 +398,13 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
                     objectDetails.info.forEach((item) => {
                         updatedObjectData.info[item.key] = item.value;
                     });
+                    Swal.alert("수정 성공.", "3D 와 세부정보를 확인해주세요", "success");  // alert를 띄움;
+
+                            //         if (response.status === 200) { // 서버에서 success 키를 반환하는지 확인해주세요
+        //             Swal.alert("수정 성공.", "3D 와 세부정보를 확인해주세요", "success");  // alert를 띄움;
+        //         } else {
+        //             Swal.alert("수정 실패", "다시 시도 해주세요.", "warning");  // alert를 띄움
+        //         }
                 }
 
                 return updatedData;
@@ -436,29 +415,6 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
 
             console.log('Data before sending:', jsonData);
             setShowDetailsForm(false);
-
-            // //Send the updated jsonData to the server as a byte array
-            // try {
-            //     const response = await axios.put(
-            //         `/file/${buildingId}/${floorNum}`,
-            //         data,
-            //         {
-            //             headers: {
-            //                 'Content-Type': 'application/json; charset=UTF-8',
-            //             },
-            //         }
-            //     )
-            // .then(response => {
-            //         if (response.status === 200) { // 서버에서 success 키를 반환하는지 확인해주세요
-            //             Swal.alert("수정 성공.", "3D 와 세부정보를 확인해주세요", "success");  // alert를 띄움;
-            //         } else {
-            //             Swal.alert("수정 실패", "다시 시도 해주세요.", "warning");  // alert를 띄움
-            //         }
-
-            //     });
-            // } catch (error) {
-            //     console.error('Error updating floor:', error);
-            // }
 
         }
     };
@@ -474,14 +430,14 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
                     },
                 }
             )
-        .then(response => {
-                if (response.status === 200) { // 서버에서 success 키를 반환하는지 확인해주세요
-                    Swal.alert("수정 성공.", "3D 와 세부정보를 확인해주세요", "success");  // alert를 띄움;
-                } else {
-                    Swal.alert("수정 실패", "다시 시도 해주세요.", "warning");  // alert를 띄움
-                }
+        // .then(response => {
+        //         if (response.status === 200) { // 서버에서 success 키를 반환하는지 확인해주세요
+        //             Swal.alert("수정 성공.", "3D 와 세부정보를 확인해주세요", "success");  // alert를 띄움;
+        //         } else {
+        //             Swal.alert("수정 실패", "다시 시도 해주세요.", "warning");  // alert를 띄움
+        //         }
 
-            });
+        //     });
         } catch (error) {
             console.error('Error updating floor:', error);
         }
