@@ -264,6 +264,19 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
         setData(jsonData);
     }, [jsonData]);
 
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                setShowDetailsForm(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [setShowDetailsForm]);
 
     // 오브젝트 클릭 핸들러
     const handleObjectClick = (object) => {
