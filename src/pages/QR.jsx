@@ -25,7 +25,7 @@ const CreateCode = ({buildingId, setOffcanvas, jsonData}) => {
             console.log('Invalid buildingId');
             return;
         }
-        setPageLink(`http://220.90.179.63:3000/guest?buildingId=${buildingId}`);
+        setPageLink(`http://10.101.67.151:3000/guest?buildingId=${buildingId}`);
         openModal();
     };
 

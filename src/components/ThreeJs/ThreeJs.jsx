@@ -126,11 +126,6 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel
         }
     }, [selectedObject, jsonData]);
 
-    // useEffect(()=>{
-        
-    // },[objectDetails])
-    
-
     // 입력 필드 변경 이벤트 핸들러
     const handleInfoInputChange = (e, index, type) => {
         setObjectDetails((prevDetails) => {
@@ -183,7 +178,6 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel
     // 렌더링
     return (
         <Draggable
-            handle=".modal-header"
             defaultPosition={{ x: 70, y: 20 }} // Set the default position
             bounds="parent" // Restrict dragging to the parent element
         >
@@ -196,39 +190,53 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel
                 zIndex: 100
             }}>
                 {/* 선택된 오브젝트의 이름을 보여주는 레이블과 방 이름 입력 필드 */}
-                <div className="modal-header">
-                    <label>{objectDetails.roomName}</label>
+                <div>
+                    <input
+                        className="text_room"
+                        type="text"
+                        value={objectDetails.roomName}
+                        onChange={handleRoomNameChange}
+                    />
                 </div>
                 <br/>
-                <div style={{marginLeft: '10px'}}>
+                <div>
                     {/* 오브젝트의 정보를 입력받는 동적 필드들 */}
                     {objectDetails.info && objectDetails.info.map((item, index) => (
                         <div key={index}>
                             <input
                                 className="text_key"
                                 type="text"
-                                placeholder="비어있음"
+                                placeholder="항목"
                                 value={item.key}
                                 onChange={(e) => handleInfoInputChange(e, index, 'key')}
-                                disabled
                             />
                             <input
                                 className="text_value"
                                 type="text"
-                                placeholder="비어있음"
+                                placeholder="값"
                                 value={item.value}
                                 onChange={(e) => handleInfoInputChange(e, index, 'value')}
-                                disabled
                             />
+                            <button className='btn btn-primary1 btn_remove' onClick={() => handleRemoveField(index)}>
+                                <FontAwesomeIcon icon={faTimes}/>
+                            </button>
                         </div>
                     ))}
+                    {/* 메타데이터 필드 추가 버튼 */}
+                    <button className='btn button-plus' onClick={addMetadataField}>
+                        항목 추가
+                    </button>
                 </div>
                 <br/>
                 <div>
                     {/* 저장 및 취소 버튼 */}
-                    <div>
+                    <div className="button-container">
+                        <button className="btn btn-primary btn-layer-3_1" onClick={onSubmit} style={{marginRight: '10px',background: '#af8b74'}}>
+                            저장
+                            <FontAwesomeIcon icon={faCheck}/>
+                        </button>
                         <button className="btn btn-primary btn-layer-3_1" onClick={onCancel} style={{background: '#af8b74'}}>
-                            닫기
+                            취소
                             <FontAwesomeIcon icon={faTimes}/>
                         </button>
                     </div>

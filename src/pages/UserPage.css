@@ -10,10 +10,11 @@
 }
 
 /* 모바일 화면에서의 스타일 */
-@media only screen and (max-width: 600px) {
-    .container {
-        width: 100%;
-        padding: 10px;
+@media (max-width: 600px) {
+    .btn_buildingName {
+        font-size: 80%;
+        width: 5%;
+        height: 5%;
     }
 }
 
