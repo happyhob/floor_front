@@ -210,7 +210,6 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel
                                 placeholder="비어있음"
                                 value={item.key}
                                 onChange={(e) => handleInfoInputChange(e, index, 'key')}
-                                disabled
                             />
                             <input
                                 className="text_value"
@@ -218,7 +217,6 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onSubmit, onCancel
                                 placeholder="비어있음"
                                 value={item.value}
                                 onChange={(e) => handleInfoInputChange(e, index, 'value')}
-                                disabled
                             />
                         </div>
                     ))}
