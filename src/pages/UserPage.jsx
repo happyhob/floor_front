@@ -1,16 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import { useLocation } from 'react-router-dom';
-import GuestSideBar from "../components/GuestSideBar/GuestSideBar";
 import GuestThreeJs from "../components/GuestThreeJs/GuestThreeJs";
 import axios from "axios";
 
 const UserPage = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
-    //  const searchParams = location.search;
-    //  const query = queryString.parse(searchParams); //사용
-    //  const [buildingId, setBuildingId] = useState(query.buildingId); // 건물 아이디
-
 
     const [buildingId, setBuildingId] = useState(queryParams.get("buildingId")); // 건물 아이디
     let [gltfBlobUrl, setGltfBlobUrl] = useState(null); //  gltf 파일 blob url
@@ -20,17 +15,17 @@ const UserPage = () => {
 
     const btn_buildingName = {
         border : 'none',
-        fontSize : '50px',
         backgroundColor : 'transparent',
         color : '#522b07',
         fontWeight : 'bold',
         position : 'fixed',
         top : '3%',
-        right : '50%',
-        left : '50%',
+        right : window.innerWidth <= 600 ? '60%' : '50%',
+        left : window.innerWidth <= 600 ? '40%' : '50%',
         transform: 'translate(-50%, -50%)',
-        width : '200px',
-        height : '70px',
+        fontSize: window.innerWidth <= 600 ? '130%' : '50px', // 화면 너비가 600px 이하일 경우, 폰트 크기를 30px로 조정
+        width: window.innerWidth <= 600 ? '30%' : '200px', // 화면 너비가 600px 이하일 경우, 너비를 150px로 조정
+        height: window.innerWidth <= 600 ? '100%' : '70px', // 화면 너비가 600px 이하일 경우, 높이를 50px로 조정
     }
 
         // 건물 파일 불러오기

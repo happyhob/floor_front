@@ -11,6 +11,7 @@ import Draggable from 'react-draggable';
 import axios from "axios";
 import { MdOutlineKeyboardBackspace } from "react-icons/md";
 import * as Swal from "../../apis/alert";
+import "./GuestThreeJs.css"
 
 // 도면 3D 모델을 렌더링하는 Model 컴포넌트
 const Model = ({ url,onObjectClick, setnewgltf, setModifiedObjects, findObj }) => {
@@ -233,8 +234,8 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onCancel, jsonData
         >
             <div className="input1" style={{
                 position: 'absolute',
-                top: '20%',
-                left: '70%',
+                top: '10%',
+                left: '20%',
                 background: "rgba(106,36,3,0.89)",
                 padding: '20px',
                 zIndex: 100
@@ -279,8 +280,6 @@ const ObjectDetailsForm = ({ objectDetails, setObjectDetails, onCancel, jsonData
                 </div>
             </div>
         </Draggable>
-
-
     );
 };
 
@@ -310,6 +309,19 @@ const GuestThreeJs = ({ buildingId, gltfBlobUrl: initialGltfBlobUrl, jsonData: i
         setData(initialJsonData);
     }, [initialJsonData]);
 
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                setShowDetailsForm(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [setShowDetailsForm]);
 
     const floormodel=(num)=>{
         const url = `/guest/${buildingId}/${num}`;
@@ -460,7 +472,7 @@ const GuestThreeJs = ({ buildingId, gltfBlobUrl: initialGltfBlobUrl, jsonData: i
             gltf.traverse((child) => {
                 if (child instanceof THREE.Mesh && child.name.includes('polygon')) {
                     objects.push(child)
-                    if(child.name == findObj)
+                    if(child.name === findObj)
                     {
                         const newMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // 빨간색으로 변경하려면 0xff0000을 원하는 색상으로 변경하세요.
                         child.material = newMaterial;
@@ -531,7 +543,7 @@ const GuestThreeJs = ({ buildingId, gltfBlobUrl: initialGltfBlobUrl, jsonData: i
             setFindObj(objName);
             console.log(floorNum, objName);
 
-            if(response.status==200)
+            if(response.status===200)
             {
                 floormodel(floorNum);
             }
@@ -559,25 +571,18 @@ const GuestThreeJs = ({ buildingId, gltfBlobUrl: initialGltfBlobUrl, jsonData: i
     const findCencel=()=>{
         setFindObj(null);
         fetchBuilding(buildingId);
+        handleCancelDetails();
     }
 
     const handleGoBack = () => {
         fetchBuilding(buildingId);
+        handleCancelDetails();
     };
-
-    const mobileStyle = {
-        width: '100%',
-        height: 'auto',
-        '@media (max-width: 600px)': {
-            width: '100%',
-            height: 'auto',
-        },
-    }
 
     // 렌더링
     return (
-        <div style={mobileStyle}>
-            <button className='btn_back' onClick={handleGoBack}><MdOutlineKeyboardBackspace style={{fontSize : '25px', marginRight : '3px'}} />돌아가기</button>
+        <div>
+            <button className='btn_back' onClick={handleGoBack}><MdOutlineKeyboardBackspace className='back_icon' />돌아가기</button>
             <div className='find' style={{position: 'fixed', right: '1%' ,top: '1%'}}>
                 <input
                     className='input_search'

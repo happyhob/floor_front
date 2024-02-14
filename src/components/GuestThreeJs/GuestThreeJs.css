@@ -1,0 +1,44 @@
+@media (max-width: 600px) {
+    .btn_back {
+        /* 모바일 화면에 맞게 스타일을 조정하세요 */
+        font-size: 80%;
+        width: 20%;
+        height: 5%;
+    }
+    .back_icon{
+        font-size: 80%;
+    }
+
+    .input_search{
+        width: 60%;
+        height: 1em;
+        position: absolute;
+        right: 40%;
+    }
+
+    .btn_search{
+        padding: 0;
+        width: 18%;
+        height: 3dvh;
+        font-size: 70%;
+        position: absolute;
+        right: 15%;
+        top: 15%;
+    }
+
+    .btn_search_cancel{
+        padding: 0;
+        width: 18%;
+        height: 3dvh;
+        font-size: 70%;
+        position: absolute;
+        right: 0;
+        top: 15%;
+    }
+
+    .find{
+        width: 50%;
+        height: 10%;
+    }
+
+}
