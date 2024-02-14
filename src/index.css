@@ -10,7 +10,7 @@ body {
   font-size: var(--font-size-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: url("./components/Assets/건축물.jpg") no-repeat center;
+  background: url("components/Assets/BackgroundImage.jpg") no-repeat center;
   background-size: cover;
 }
 ul { list-style-type: none; }

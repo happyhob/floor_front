@@ -18,9 +18,6 @@ const LoginContextProvider = ({ children }) => {
   // 유저 정보
   const [userInfo, setUserInfo] = useState({});
 
-  // 아이디 저장
-  const [rememberUserId, setRememberUserId] = useState()
-
   /**
    * 💍✅ 로그인 체크
    */

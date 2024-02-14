@@ -6,7 +6,7 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import React, {useContext, useEffect, useState} from "react";
 import {LoginContext} from "../../contexts/LoginContextProvider";
-import {Link, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import * as Swal from "../../apis/alert";
 import './SideBar.css';
 import UploadModal from "../UploadModal/UploadModal";
@@ -146,7 +146,7 @@ function SideBar({setGltfBlobUrl, setJsonData, setBuildingId, setFloorNum}) {
         console.log("건물 삭제 요청", buildingid)
         const response = auth.delBuild(buildingid.buildingId);
         console.log(response.status);
-        if(response.status==200)
+        if(response.status===200)
         {
             Swal.alert("삭제 성공", "건물 번호:"+buildingid.buildingId, "success");  // alert를 띄움;
         }
