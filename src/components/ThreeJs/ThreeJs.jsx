@@ -67,11 +67,10 @@ const Model = ({ url,onObjectClick, setnewgltf, setText, setModifiedObjects }) =
         
         setRenderCount(prevCount => prevCount + 1);
 
-
         if(renderCount<=1){
             handleClick({ clientX: window.innerWidth / 2 -1, clientY: window.innerHeight / 2 -1});
             gltf.traverse((child) => {
-                if (child instanceof THREE.Mesh && child.name.includes('polygon3')) {
+                if (child instanceof THREE.Mesh && child.name.includes('polygon1')) {
                     objects.push(child)
                     handleClick({ clientX: child.position.x, clientY: child.position.y });
                 }
@@ -258,6 +257,7 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
     const [modifiedObjects, setModifiedObjects] = useState({});
     const [gltf, setGltf] = useState(null);
     const [data, setData] = useState({});
+    const [renderCount, setRenderCount] = useState(1);
 
     // 초기에 JSON 데이터 설정
     useEffect(() => {
@@ -282,7 +282,12 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
     const handleObjectClick = (object) => {
         setSelectedObject(object);
 
-        setShowDetailsForm(true);
+        setRenderCount(prevCount => prevCount + 1);
+        console.log(renderCount);
+        if(renderCount>2 &&renderCount<9 || renderCount>12 )
+        {
+            setShowDetailsForm(true);
+        }
         const objectLabels = labels[object.name];
 
         setObjectDetails({
@@ -304,6 +309,8 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
         const str = object.name;
         const str2 = str.split('_');
         console.log('Selected Object UUID:', str2);
+        
+        
     };
 
 
@@ -374,10 +381,12 @@ const ThreeJs = ({gltfBlobUrl, buildingId, floorNum, jsonData }) => {
         setLabels({});
         setGltf(newgltf);
         console.log(jsonData);
+        setRenderCount(0);
     };
 
     useEffect(()=>{
         setLabels({});
+        
         if(gltf)
         {
             gltf.traverse((child) => {

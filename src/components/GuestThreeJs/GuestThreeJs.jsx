@@ -298,6 +298,7 @@ const GuestThreeJs = ({ buildingId, gltfBlobUrl: initialGltfBlobUrl, jsonData: i
     const [gltfBlobUrl, setGltfBlobUrl] = useState();
     const [gltfBlobUrl2, setGltfBlobUrl2] = useState(initialGltfBlobUrl);
     const [jsonData, setJsonData] = useState(initialJsonData);
+    const [renderCount, setRenderCount] = useState(1);
 
     // 초기에 JSON 데이터 설정
     useEffect(() => {
@@ -360,7 +361,14 @@ const GuestThreeJs = ({ buildingId, gltfBlobUrl: initialGltfBlobUrl, jsonData: i
     // 오브젝트 클릭 핸들러
     const handleObjectClick = (object) => {
         setSelectedObject(object);
-        setShowDetailsForm(true);
+
+        
+        setRenderCount(prevCount => prevCount + 1);
+        console.log(renderCount);
+        if(renderCount>2 &&renderCount<9 || renderCount>12 )
+        {
+            setShowDetailsForm(true);
+        }
 
         const objectLabels = labels[object.name];
 
@@ -463,6 +471,7 @@ const GuestThreeJs = ({ buildingId, gltfBlobUrl: initialGltfBlobUrl, jsonData: i
         //     }
         // });
         console.log(jsonData);
+        setRenderCount(0);
     };
 
     useEffect(()=>{
@@ -531,8 +540,12 @@ const GuestThreeJs = ({ buildingId, gltfBlobUrl: initialGltfBlobUrl, jsonData: i
 
     // 방 검색 핸들러
     const searchRoom=()=>{
+
         // e.preventDefault();
         // const searchRoom = e.target.search.value;
+
+        setShowDetailsForm(false);
+
         console.log(searchtest)
         const url = `/guest/${buildingId}/search?roomName=${searchtest}`
         axios.get(url,{ responseType: 'json' })
@@ -547,6 +560,7 @@ const GuestThreeJs = ({ buildingId, gltfBlobUrl: initialGltfBlobUrl, jsonData: i
             {
                 floormodel(floorNum);
             }
+            
 
         })
         .catch(error => {

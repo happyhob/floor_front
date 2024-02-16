@@ -21,10 +21,10 @@ const UserPage = () => {
         position : 'fixed',
         top : '3%',
         right : window.innerWidth <= 600 ? '60%' : '50%',
-        left : window.innerWidth <= 600 ? '40%' : '50%',
+        left : window.innerWidth <= 600 ? '35%' : '50%',
         transform: 'translate(-50%, -50%)',
-        fontSize: window.innerWidth <= 600 ? '130%' : '50px', // 화면 너비가 600px 이하일 경우, 폰트 크기를 30px로 조정
-        width: window.innerWidth <= 600 ? '30%' : '200px', // 화면 너비가 600px 이하일 경우, 너비를 150px로 조정
+        fontSize: window.innerWidth <= 600 ? '80%' : '40px', // 화면 너비가 600px 이하일 경우, 폰트 크기를 30px로 조정
+        width: window.innerWidth <= 600 ? '35%' : '350px', // 화면 너비가 600px 이하일 경우, 너비를 150px로 조정
         height: window.innerWidth <= 600 ? '100%' : '70px', // 화면 너비가 600px 이하일 경우, 높이를 50px로 조정
     }
 

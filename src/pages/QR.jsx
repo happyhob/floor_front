@@ -25,7 +25,7 @@ const CreateCode = ({buildingId, setOffcanvas, jsonData}) => {
             console.log('Invalid buildingId');
             return;
         }
-        setPageLink(`http://10.101.67.151:3000/guest?buildingId=${buildingId}`);
+        setPageLink(`http://220.90.179.63:3000/guest?buildingId=${buildingId}`);
         openModal();
     };
 
@@ -62,7 +62,7 @@ const CreateCode = ({buildingId, setOffcanvas, jsonData}) => {
                        transform: 'translate(-50%, -50%)'
                    }}>
                 <Modal.Header closeButton>
-                    <Modal.Title>QR 코드</Modal.Title>
+                    <Modal.Title style={{color : 'black'}}>QR 코드</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <div ref={qrCanvasRef}>
